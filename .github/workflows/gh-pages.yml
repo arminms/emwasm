@@ -1,0 +1,31 @@
+name: github pages
+
+# run when a commit is pushed to "source" branch
+on:
+  push:
+    branches:
+    - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    # checkout to the commit that has been pushed
+    - uses: actions/checkout@v4
+
+    - name: Setup emsdk
+      uses: mymindstorm/setup-emsdk@v14
+      with:
+        version: 3.1.63
+        actions-cache-folder: 'emsdk-cache'
+
+    - name: Build
+      run: mkdir -p public && emcc wasm_sdl.c -o public/index.html
+
+    # push the generated content into the `gh-pages` branch.
+    - name: Deploy
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_branch: gh-pages
+        publish_dir: ./public
